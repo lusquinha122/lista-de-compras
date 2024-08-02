@@ -1,0 +1,107 @@
+const fs = require('fs');
+
+// Função para ler o arquivo de compras
+function lerCompras() {
+  fs.readFile('compras.txt', 'utf8', (err, data) => {
+    if (err) {
+      console.error(err);
+      return;
+    }
+    const compras = data.split('\n');
+    console.log('Compras:');
+    compras.forEach((compra, index) => {
+      const [nome, preco] = compra.split(';');
+      console.log(`${index + 1}. ${nome} - R$ ${preco}`);
+    });
+  });
+}
+
+// Função para adicionar uma compra ao arquivo
+function adicionarCompra(nome, preco) {
+  fs.appendFile('compras.txt', `${nome};${preco}\n`, (err) => {
+    if (err) {
+      console.error(err);
+      return;
+    }
+    console.log(`Compra adicionada: ${nome} - R$ ${preco}`);
+  });
+}
+
+// Função para remover uma compra do arquivo
+function removerCompra(index) {
+  fs.readFile('compras.txt', 'utf8', (err, data) => {
+    if (err) {
+      console.error(err);
+      return;
+    }
+    const compras = data.split('\n');
+    compras.splice(index - 1, 1);
+    const novoConteudo = compras.join('\n');
+    fs.writeFile('compras.txt', novoConteudo, (err) => {
+      if (err) {
+        console.error(err);
+        return;
+      }
+      console.log(`Compra removida`);
+    });
+  });
+}
+
+// Função para calcular o total das compras
+function calcularTotal() {
+  fs.readFile('compras.txt', 'utf8', (err, data) => {
+    if (err) {
+      console.error(err);
+      return;
+    }
+    const compras = data.split('\n');
+    let total = 0;
+    compras.forEach((compra) => {
+      const [nome, preco] = compra.split(';');
+      total += parseFloat(preco);
+    });
+    console.log(`Total: R$ ${total.toFixed(2)}`);
+  });
+}
+
+// Menu de opções
+console.log('Menu de Compras');
+console.log('1. Ler Compras');
+console.log('2. Adicionar Compra');
+console.log('3. Remover Compra');
+console.log('4. Calcular Total');
+console.log('5. Sair');
+
+const readline = require('readline');
+const rl = readline.createInterface({
+  input: process.stdin,
+  output: process.stdout
+});
+
+rl.question('Escolha uma opção: ', (opcao) => {
+  switch (opcao) {
+    case '1':
+      lerCompras();
+      break;
+    case '2':
+      rl.question('Digite o nome do produto: ', (nome) => {
+        rl.question('Digite o preço do produto: ', (preco) => {
+          adicionarCompra(nome, preco);
+        });
+      });
+      break;
+    case '3':
+      rl.question('Digite o número da compra a remover: ', (index) => {
+        removerCompra(parseInt(index));
+      });
+      break;
+    case '4':
+      calcularTotal();
+      break;
+    case '5':
+      console.log('Saindo...');
+      process.exit(0);
+    default:
+      console.log('Opção inválida');
+  }
+});
